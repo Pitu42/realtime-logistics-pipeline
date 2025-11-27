@@ -38,5 +38,26 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  beam-processor:
+    image: python:3.11-slim
+    container_name: beam-processor
+    depends_on:
+      - kafka
+    volumes:
+      - .:/app
+      - beam_cache:/root/.cache/pip
+    working_dir: /app
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    command: >
+      bash -c "
+        apt-get update &&
+        apt-get install -y default-jre &&
+        pip install apache-beam[kafka] kafka-python numpy apache-beam kafka-python &&
+        tail -f /dev/null
+      "
+    restart: "no"
+
 volumes:
   mongodb_data:
+  beam_cache:

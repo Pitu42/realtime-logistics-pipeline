@@ -1,7 +1,7 @@
 ## Real-time Logistics Pipeline
 
 ## Project Overview
-University project for real-time data streaming and analytics.
+Project for real-time data streaming and analytics.
 
 ## Architecture
 - Kafka for message streaming
@@ -20,8 +20,8 @@ University project for real-time data streaming and analytics.
 - [X] Install MongoDB docker image 
 - [X] Kafka consumer: MongoDB
 # Phase 3 - Streaming aggregation
-- [X] Kafka consumer: Apache Beam
-    - [X] Create draft Apache Beam stream aggregation
+- [X] Kafka consumer: Apache spark
+    - [X] Create draft Apache spark stream aggregation
     - [ ] Create draft item aggregation with pandas df
 # Phase 4 - SQL/NoSQL whs
 - [ ] Decide if item data will be stored in SQL or NoSQL db (consistency is the most important, so maybe sql)

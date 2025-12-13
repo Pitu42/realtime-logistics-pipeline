@@ -38,11 +38,27 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    hostname: postgres
+    volumes:
+      - .:/app
+    working_dir: /app
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: admin
+      POSTGRES_DB: item_data
+
   spark:
     image: eclipse-temurin:17-jre-ubi9-minimal
     container_name: spark
     depends_on: 
       - kafka
+      - postgres
     volumes:
       - .:/app
         #- spark_cache:/root/.cache/pip
@@ -53,10 +69,28 @@ services:
       bash -c "
       microdnf update -y &&
       microdnf install -y python3 python3-pip &&
-      pip install pyspark kafka-python numpy && 
-      python3 parcel_aggregator_to_carrier.py 
+      pip install pyspark kafka-python numpy &&
+      pip install psycopg2-binary &&
+      python3 insert_item_data.py &&
+      python3 parcel_aggregation.py
       "
     restart: "no"
+
+  producer:
+    image: python:3.11-slim
+    container_name: producer
+    depends_on:
+      - kafka
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    command: >
+      bash -c "
+      pip install numpy kafka-python &&
+      python producer.py
+      "
       
 volumes:
   mongodb_data:

@@ -7,7 +7,7 @@ import numpy as np
 
 # Create Kafka producer
 producer = KafkaProducer(
-    bootstrap_servers=['localhost:9092'],
+    bootstrap_servers=['kafka:29092'], #localhost:9092'],
     value_serializer=lambda x: json.dumps(x).encode('utf-8')
 )
 
@@ -18,17 +18,33 @@ def create_purchase_order():
     order_qty = np.random.poisson(lam=1) + 1 # min order is 1
     order = {
         "order_id": order_id,
-        "item_id": np.random.randint(1,101, size=order_qty).tolist(),
+        "item_id": np.random.randint(0,10, size=order_qty).tolist(),
         "quantity": np.random.randint(1,5, size=order_qty).tolist(),
         "timestamp": datetime.datetime.now().isoformat()
     }
-    
     return order
+
+def create_purchase_order_json(order_id):
+    num_items = random.randint(1,3)
+    items = []
+
+    for i in range(num_items):
+        items.append({
+            "item_id":random.randint(0,11),
+            "quantity":random.randint(1,3)
+        })
+    return {
+        "order_id": order_id,
+        "item_id": items,
+        "timestamp": datetime.datetime.now().isoformat()
+            }
+
 
 # Send payload to kafka
 def send_order():
     try:
-        order = create_purchase_order()
+        #order = create_purchase_order()
+        order = create_purchase_order_json(order_id)
         
         # Send to Kafka topic
         future = producer.send('purchase-orders', order)

@@ -38,6 +38,23 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  mongo_inserter:
+    image: python:3.11-slim
+    container_name: mongo_inserter
+    depends_on:
+      - kafka
+      - mongodb
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    command: >
+      bash -c "
+      pip install pymongo kafka-python &&
+      python consumer_to_mongo.py
+      "
+
   postgres:
     image: postgres:15
     container_name: postgres
@@ -72,7 +89,7 @@ services:
       pip install pyspark kafka-python numpy &&
       pip install psycopg2-binary &&
       python3 insert_item_data.py &&
-      python3 parcel_aggregation.py
+      python3 parcel_aggregator_to_carrier.py
       "
     restart: "no"
 
@@ -91,6 +108,72 @@ services:
       pip install numpy kafka-python &&
       python producer.py
       "
+
+  api-tracking-request:
+    image: python:3.11-slim
+    container_name: api-tracking-request
+    depends_on:
+      - kafka
+      - mongodb
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    command: >
+      bash -c "
+      pip install kafka-python pymongo requests &&
+      python api/api_requests.py
+      "
+
+  carrier-api:
+    image: python:3.11-slim
+    container_name: carrier-api
+    depends_on:
+      - kafka
+      - mongodb
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - "8000:8000"
+    command: >
+      bash -c "
+      pip install pymongo requests fastapi uvicorn &&
+      python api/carrier_api.py
+      "
+
+  status_receiver_api:
+    image: python:3.11-slim
+    container_name: status_receiver_api 
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - "8001:8001"
+    command: >
+      bash -c "
+      pip install pymongo requests fastapi uvicorn &&
+      python api/status_receiver_api.py
+      "
+
+  carrier_status:
+    image: python:3.11-slim
+    container_name: carrier_status
+    depends_on:
+      - mongodb
+      - status_receiver_api
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: >
+      bash -c "
+      pip install pymongo requests &&
+      python api/carrier_status.py
+      "
+
       
 volumes:
   mongodb_data:

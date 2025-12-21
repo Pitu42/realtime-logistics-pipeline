@@ -45,7 +45,8 @@ def complete_aggregation2():
             .format("kafka") \
             .option("kafka.bootstrap.servers", "kafka:29092") \
             .option("subscribe", "purchase-orders") \
-            .option("startingOffsets", "latest") \
+            .option("kafka.group.id", "spark-purchase") \
+            .option("startingOffsets", "earliest") \
             .option("failOnDataLoss", "false") \
             .load()
 

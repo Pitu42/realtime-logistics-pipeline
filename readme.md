@@ -22,20 +22,14 @@ Project for real-time data streaming and analytics.
 # Phase 3 - Streaming aggregation
 - [X] Kafka consumer: Apache spark
     - [X] Create draft Apache spark stream aggregation
-    - [ ] Create draft item aggregation with pandas df
+    - [X] Create draft item aggregation with pandas df
 # Phase 4 - SQL/NoSQL whs
-- [ ] Decide if item data will be stored in SQL or NoSQL db (consistency is the most important, so maybe sql)
-    - [ ] if SQL: install postgressql docker image
-- [ ] Generate item data (price, lenght, width, height, weight)
+- [X] Decide if item data will be stored in SQL or NoSQL db (consistency is the most important, so maybe sql)
+    - [X] if SQL: install postgressql docker image
+- [X] Generate item data (price, lenght, width, height, weight)
 # Phase 5 - Carrier API
-- [ ] Create carrier api:
-    - [ ] Post track and trace
-    - [ ] Post shipping events
-# Phase 6 - Carrier Integration
-- [ ] New Producer: Apache beam -> Item_data
-- [ ] New Consumer: Carrier Api -> Item_data
-- [ ] New Producer: Carrier Api -> tracking_code
-- [ ] New Consumer: MongoDB -> tracking_code (new db link order_id to tracking_code)
-- [ ] New Producer: Carrier Api -> event code
+- [X] Create carrier api:
+    - [X] Post track and trace
+    - [X] Post shipping events
 # Phase 7 - OLAP
-- [ ] Beam batch processing to sql whs for olap
+- [] Create a sql table based on mongodb for analytics

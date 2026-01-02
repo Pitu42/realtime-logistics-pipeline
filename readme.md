@@ -12,6 +12,28 @@ Project for real-time data streaming and analytics.
 - Apache Beam for stream data processing
 - SQL data warehouse for aggregation and analysis
 
+## How to use
+1. Clone the repository
+```bash
+git clone https://github.com/Pitu42/realtime-logistics-pipeline/
+cd realtime-logistics-pipeline
+```
+2. Start the pipeline with docker compose
+`sudo docker-compose up`
+3. View container logs
+`sudo docker container logs <service-name>`
+
+## Pipeline outputs
+The pipeline processes purchase orders in real-time and stores the data in two databases:
+
+MongoDB Collections:
+- orders_db.purchase_orders - Raw purchase order data from customers
+- parcel_db.purchase_orders - Aggregated parcel data
+- parcel_db.parcel_orders - Parcel data used by carrier
+
+PostgreSQL Tables:
+- order_analytics - Analytics data for operations.
+
 ## Development Progress
 # Phase 1 - Kafka
 - [X] Install Kafka docker image

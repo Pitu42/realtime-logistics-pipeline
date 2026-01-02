@@ -1,7 +1,6 @@
 ## Real-time Logistics Pipeline
 
 ![pipeline_diagram](https://github.com/user-attachments/assets/f3e8fc99-8afe-4c34-8393-f1ba569def78)
-[pipeline_diagram-1.pdf](https://github.com/user-attachments/files/24410839/pipeline_diagram-1.pdf)
 
 
 ## Project Overview

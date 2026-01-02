@@ -1,5 +1,9 @@
 ## Real-time Logistics Pipeline
 
+![pipeline_diagram](https://github.com/user-attachments/assets/f3e8fc99-8afe-4c34-8393-f1ba569def78)
+[pipeline_diagram-1.pdf](https://github.com/user-attachments/files/24410839/pipeline_diagram-1.pdf)
+
+
 ## Project Overview
 Project for real-time data streaming and analytics.
 
@@ -8,8 +12,6 @@ Project for real-time data streaming and analytics.
 - MongoDB historical data and transaction
 - Apache Beam for stream data processing
 - SQL data warehouse for aggregation and analysis
-
-
 
 ## Development Progress
 # Phase 1 - Kafka
@@ -27,9 +29,11 @@ Project for real-time data streaming and analytics.
 - [X] Decide if item data will be stored in SQL or NoSQL db (consistency is the most important, so maybe sql)
     - [X] if SQL: install postgressql docker image
 - [X] Generate item data (price, lenght, width, height, weight)
-# Phase 5 - Carrier API
+# Phase 5 - Streaming aggregation v2.0
+- [X] Apache Spark streaming aggregation using postgres item master data
+# Phase 6 - Carrier API
 - [X] Create carrier api:
     - [X] Post track and trace
     - [X] Post shipping events
 # Phase 7 - OLAP
-- [] Create a sql table based on mongodb for analytics
+- [X] Create a sql table from mongodb data for analytics

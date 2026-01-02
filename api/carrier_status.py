@@ -10,12 +10,13 @@ mongo_client = MongoClient('mongodb://admin:password@mongodb:27017/')
 db = mongo_client['parcel_db']
 parcel_collection = db['parcel_orders']
 
-
-# Check how many orders have no status
-na_count = parcel_collection.count_documents({"status": None})
+# Wait for orders
+time.sleep(30)
 
 # Change the status of a random order
 while True:
+    # Check how many orders have no status
+    na_count = parcel_collection.count_documents({"status": None})
     if na_count > 0:
         cursor = parcel_collection.aggregate([
             {"$match": {"status": None}},

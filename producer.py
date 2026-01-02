@@ -2,6 +2,7 @@ from kafka import KafkaProducer
 import json
 import time
 import random
+import string
 import datetime
 import numpy as np
 
@@ -13,19 +14,16 @@ producer = KafkaProducer(
 
 order_id = 1
 
-# simulate purchase order
-def create_purchase_order():
-    order_qty = np.random.poisson(lam=1) + 1 # min order is 1
-    order = {
-        "order_id": order_id,
-        "item_id": np.random.randint(0,10, size=order_qty).tolist(),
-        "quantity": np.random.randint(1,5, size=order_qty).tolist(),
-        "timestamp": datetime.datetime.now().isoformat()
-    }
-    return order
+def create_zip_code():
+    # 4 random int with leading zero + 2 random letters
+    rand_int = str(random.randint(0, 9999)).zfill(4)
+    rand_str = random.choice(string.ascii_letters).upper()
+    return rand_int+rand_str+rand_str
 
+# simulate purchase order
 def create_purchase_order_json(order_id):
     num_items = random.randint(1,3)
+    zipcode = create_zip_code()
     items = []
 
     for i in range(num_items):
@@ -35,19 +33,20 @@ def create_purchase_order_json(order_id):
         })
     return {
         "order_id": order_id,
+        "zipcode": zipcode,
         "item_id": items,
         "timestamp": datetime.datetime.now().isoformat()
             }
 
 
 # Send payload to kafka
-def send_order():
+def send_order(kafka_topic):
     try:
         #order = create_purchase_order()
         order = create_purchase_order_json(order_id)
         
         # Send to Kafka topic
-        future = producer.send('purchase-orders', order)
+        future = producer.send(kafka_topic, order)
         
         # Wait for confirmation
         result = future.get(timeout=10)
@@ -62,7 +61,8 @@ if __name__ == "__main__":
     print("Starting Kafka Producer")
     
     while True:
-        send_order()
+        send_order('purchase-orders')
+        #send_order('purchase-orders-histo')
         order_id += 1
         time.sleep(1)
     

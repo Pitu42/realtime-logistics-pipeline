@@ -4,16 +4,16 @@ import json
 import datetime
 
 # MongoDB connection
-mongo_client = MongoClient('mongodb://admin:password@localhost:27017/')
+mongo_client = MongoClient('mongodb://admin:password@mongodb:27017/')
 db = mongo_client['orders_db']
 orders_collection = db['purchase_orders']
 
 # Kafka consumer
 consumer = KafkaConsumer(
     'purchase-orders',
-    bootstrap_servers=['localhost:9092'],
+    bootstrap_servers=['kafka:29092'],
     value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-    auto_offset_reset='latest',
+    auto_offset_reset='earliest',
     group_id='mongodb-consumer'
 )
 
@@ -28,7 +28,7 @@ try:
             # Insert into MongoDB
             result = orders_collection.insert_one(order)
             
-            print(f"Saved order: {order['order_id']}, item lines: {len(order['item_id'])}"
+            print(f"Saved order: {order['order_id']}, item lines: {len(order['item_id'])}")
             
         except Exception as e:
             print(f"Insert error: {e}")

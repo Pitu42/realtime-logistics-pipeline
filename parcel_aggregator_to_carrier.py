@@ -3,7 +3,7 @@ from pyspark.sql.functions import col, to_json, struct, concat, lit, from_json, 
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, ArrayType, FloatType
 
 
-# Define schemas
+# schemas
 item_schema = StructType([
     StructField("item_id", IntegerType(), True),
     StructField("quantity", IntegerType(), True)
@@ -11,20 +11,12 @@ item_schema = StructType([
 
 order_schema = StructType([
     StructField("order_id", IntegerType(), True),
+    StructField("zipcode", StringType(), True),
     StructField("item_id", ArrayType(item_schema), True),
     StructField("timestamp", StringType(), True)
 ])
 
-# Create Spark session for kafka and add postgresql drivers
-'''
-spark = SparkSession.builder \
-    .appName("KafkaSteamProcessing") \
-    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.13:4.0.1") \
-    .config("spark.jars", "/postgresql-42.7.8.jar") \
-    .config("spark.sql.streaming.forceDeleteTempCheckpointLocation", "true") \
-    .getOrCreate()
-'''
-# get driver from website
+# Create spark session for kafka and add postgresql driver from website
 spark = SparkSession.builder \
     .appName("KafkaSteamProcessing") \
     .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.13:4.0.1,org.postgresql:postgresql:42.7.1") \
@@ -36,7 +28,7 @@ print("Loaded packages:", spark.sparkContext.getConf().get("spark.jars.packages"
 
 spark.sparkContext.setLogLevel("WARN")
 
-# From ordered items calculates parcel dimension and weight
+# From ordered items: calculates parcel dimension and weight
 def complete_aggregation2():
     try:
         # consumer
@@ -45,9 +37,10 @@ def complete_aggregation2():
             .format("kafka") \
             .option("kafka.bootstrap.servers", "kafka:29092") \
             .option("subscribe", "purchase-orders") \
-            .option("kafka.group.id", "spark-purchase") \
             .option("startingOffsets", "earliest") \
             .option("failOnDataLoss", "false") \
+            .option("kafka.session.timeout.ms", "30000") \
+            .option("kafka.request.timeout.ms", "40000") \
             .load()
 
         # Item data from PostgreSQL
@@ -64,16 +57,19 @@ def complete_aggregation2():
             .select(from_json(col("json_string"), order_schema).alias("order_data")) \
             .select(
                 col("order_data.order_id").alias("order_id"),
+                col("order_data.zipcode").alias("zipcode"),
                 col("order_data.item_id").alias("items"),
                 col("order_data.timestamp").alias("timestamp")
             )
 
         exploded_df = parsed_df.select(
             col("order_id"),
+            col("zipcode"),
             to_timestamp(col("timestamp")).cast("timestamp").alias("timestamp"),
             explode(col("items")).alias("item")
         ).select(
             col("order_id"),
+            col("zipcode"),
             col("timestamp"),
             col("item.item_id").alias("item_id"),
             col("item.quantity").alias("quantity")
@@ -89,9 +85,9 @@ def complete_aggregation2():
             "total_item_weight", col("weight") * col("quantity")
         )
 
-        watermarked_df = enriched_df.withWatermark("timestamp", "10 minutes")
+        watermarked_df = enriched_df.withWatermark("timestamp", "2 minutes")
 
-        aggregated_df = watermarked_df.groupBy("order_id", "timestamp").agg(
+        aggregated_df = watermarked_df.groupBy("order_id","zipcode", "timestamp").agg(
             spark_sum("total_item_volume").alias("total_dimensions"),
             spark_sum("total_item_weight").alias("total_weight")
         )
@@ -101,6 +97,7 @@ def complete_aggregation2():
             to_json(
                 struct(
                     col("order_id").alias("order_id"),
+                    col("zipcode").alias("zipcode"),
                     col("total_dimensions").alias("dimensions"),
                     col("total_weight").alias("weight"),
                     col("timestamp").alias("creation_date")

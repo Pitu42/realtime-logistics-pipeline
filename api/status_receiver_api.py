@@ -30,16 +30,13 @@ def create_tracking_number(request: OrderRequest):
         status = request.status
         status_time = request.status_time
         
-        result = orders_collection.update_one(
-            {"order_id":order_id},
-            {
-                "$set": {
-                    "status":status,
-                    "status_date":status_time
-                    }
-                }
-            )
-        
+        result = orders_collection.insert_one({
+            "order_id": order_id,
+            "tracking_number": tracking_number,
+            "status": status,
+            "status_date": status_time
+        })
+        print(f'Status added: {order_id}')
         return Response(status_code=200)
         
     except Exception as e:

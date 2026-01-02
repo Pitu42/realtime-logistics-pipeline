@@ -7,7 +7,6 @@ import requests
 url = 'http://carrier-api:8000/create-tracking'
 
 # MongoDB connection
-# tengo que pensar la estructura
 mongo_client = MongoClient('mongodb://admin:password@mongodb:27017/')
 db = mongo_client['orders_db']
 orders_collection = db['purchase_orders']
@@ -47,10 +46,10 @@ try:
                 if result.matched_count > 0:
                     print(f"Updated order {order_id} with tracking {tracking_number}")
                 else:
-                    print(f"No order found with ID {order_id}")
+                    print(f"No order found with order_id: {order_id}")
 
         except Exception as e:
-            print(f"Insert error: {e}")
+            print(f"Error: {e}")
             
 except KeyboardInterrupt:
     print("Stopping MongoDB consumer")
